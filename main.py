@@ -17,7 +17,7 @@ intents.members = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 TARGET_DATE = datetime.strptime("2026-01-16", "%Y-%m-%d").date()
-CHANNEL_ID = 1373457907382882354 # ← 記得換成你要發送訊息的頻道 ID
+CHANNEL_ID = 1365655328351322122 # ← 記得換成你要發送訊息的頻道 ID
 
 @bot.event
 async def on_ready():
@@ -33,9 +33,8 @@ async def on_ready():
     wait_until_9am.start()
 
 @bot.command()
-async def status(ctx):
+async def date(ctx):
     await ctx.send(f"正常運行中！")
-
 
 @tasks.loop(hours=24)
 async def send_countdown():
@@ -48,8 +47,8 @@ async def send_countdown():
         return
 
     if delta > 0:
-        await channel.send(f"學測倒數：還有 {delta} 天 看色圖之餘記得讀書")
-    elif delta == 0 and -1 and -2:
+        await channel.send(f"學測倒數：還有 {delta} 天")
+    elif delta in [0, -1, -2]:
         await channel.send("今天就是學測 學測就上")
     else:
         await channel.send(f"學測已經過了 {(-delta + 2)} 天")
@@ -65,10 +64,10 @@ async def update_channel_name():
 
     if delta > 0:
         new_name = f"學測倒數 {delta} 天"
-    elif delta == 0 and -1 and -2:
+    elif delta in [0, -1, -2]:
         new_name = "今天學測，大家加油"
     else:
-        new_name = f"⏰ 已過 {(-delta + 2)} 天"
+        new_name = f"我是分科戰神🤡"
 
     try:
         await channel.edit(name=new_name)
@@ -79,14 +78,15 @@ async def update_channel_name():
         print(f"更新頻道名稱時出錯：{e}")
 
 
-# 等到早上 9 點再開始每天執行
+# 等到晚上00:01開始執行
 @tasks.loop(count=1)
 async def wait_until_9am():
     now = datetime.now()
-    target = datetime.combine(now.date(), time(9, 0))
+    target = datetime.combine(now.date(), time(24, 1))
     if now > target:
         target += timedelta(days=1)
     await asyncio.sleep((target - now).total_seconds())
     send_countdown.start()
+    await update_channel_name()
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
