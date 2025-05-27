@@ -19,6 +19,9 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 TARGET_DATE = datetime.strptime("2026-01-16", "%Y-%m-%d").date()
 CHANNEL_ID = 1365655328351322122 # ← 記得換成你要發送訊息的頻道 ID
 
+today = datetime.now().date()
+delta = (TARGET_DATE - today).days
+
 @bot.event
 async def on_ready():
     print(f"✅ Bot 上線成功：{bot.user}")
@@ -33,13 +36,15 @@ async def on_ready():
     wait_until_9am.start()
 
 @bot.command()
-async def date(ctx):
+async def status(ctx):
     await ctx.send(f"正常運行中！")
+
+@bot.command()
+async def date(ctx):
+    await ctx.send(f"學測倒數：還有 {delta} 天")
 
 @tasks.loop(hours=24)
 async def send_countdown():
-    today = datetime.now().date()
-    delta = (TARGET_DATE - today).days
 
     channel = bot.get_channel(CHANNEL_ID)
     if not channel:
